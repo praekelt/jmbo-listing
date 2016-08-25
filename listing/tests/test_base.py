@@ -171,3 +171,23 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
 
+    def test_logical_and(self):
+        listing = Listing.objects.create()
+        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
+        listing.categories = [self.cat_a]
+        listing.tags = [self.tag_a]
+        listing.save()
+        qs = listing.queryset
+        self.assertEqual(len(qs), 2)
+        self.failUnless(self.model_a.modelbase_obj in qs)
+
+    def test_logical_and_permitted(self):
+        listing = Listing.objects.create()
+        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
+        listing.categories = [self.cat_a]
+        listing.tags = [self.tag_a]
+        listing.save()
+        qs = listing.queryset_permitted
+        self.assertEqual(len(qs), 1)
+        self.failUnless(self.model_a_published.modelbase_obj in qs)
+
