@@ -1,6 +1,8 @@
-from django.db import models
+from django.db import models, connection
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+
+from jmbo.models import ModelBase
 
 from listing.listing_styles import LISTING_CLASSES
 from listing.managers import PermittedManager
@@ -120,20 +122,19 @@ Set to zero to display all items.""",
     def get_absolute_url(self):
         return reverse("listing-detail", args=[self.slug])
 
-    @property
-    def queryset(self):
+    def _get_queryset(self, manager="objects"):
         # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
         # Django 1.7 will remove the need for this slow workaround for the
         # content field. Due to the workaround we"re not always returning a
         # real queryset.
-        content = self.content_queryset
+        content = self._get_content_queryset(manager=manager)
         if content:
             return content
 
-        q = ModelBase.permitted.all()
+        q = getattr(ModelBase, manager).all()
         one_match = False
-        if self.content_type.exists():
-            q = q.filter(content_type__in=self.content_type.all())
+        if self.content_types.exists():
+            q = q.filter(content_type__in=self.content_types.all())
             one_match = True
         if self.categories.exists():
             q1 = Q(primary_category__in=self.categories.all())
@@ -145,6 +146,7 @@ Set to zero to display all items.""",
             one_match = True
         if not one_match:
             q = ModelBase.objects.none()
+        # todo: use manager below
         q = q.exclude(id__in=self.pinned.all())
 
         # Ensure there are no duplicates. Oracle bugs require special handling
@@ -163,6 +165,14 @@ Set to zero to display all items.""",
 
         return q
 
+    @property
+    def queryset(self):
+        return self._get_queryset()
+
+    @property
+    def queryset_permitted(self):
+        return self._get_queryset(manager="permitted")
+
     def set_pinned(self, iterable):
         for n, obj in enumerate(iterable):
             ListingPinned.objects.create(
@@ -175,28 +185,42 @@ Set to zero to display all items.""",
                 modelbase_obj=obj, listing=self, position=n
             )
 
-    @property
-    def pinned_queryset(self):
+    def _get_pinned_queryset(self, manager="objects"):
         # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
         # Django 1.7 will remove the need for this slow workaround. Note we
         # return an emulated queryset.
-        li = [o for o in ModelBase.permitted.filter(listing_pinned=self)]
+        li = [o for o in getattr(ModelBase, manager).filter(listing_pinned=self)]
         order = [o.modelbase_obj.id for o in ListingPinned.objects.filter(
             listing=self).order_by("position")]
         li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
         return AttributeWrapper(li, exists=len(li))
 
     @property
-    def content_queryset(self):
+    def pinned_queryset(self):
+        return self._get_pinned_queryset()
+
+    @property
+    def pinned_queryset_permitted(self):
+        return self._get_pinned_queryset(manager="permitted")
+
+    def _get_content_queryset(self, manager="objects"):
         # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
         # Django 1.7 will remove the need for this slow workaround. Note we
         # return an emulated queryset.
-        li = [o for o in ModelBase.permitted.filter(listing_content=self)\
+        li = [o for o in getattr(ModelBase, manager).filter(listing_content=self)\
             .exclude(id__in=self.pinned.all())]
         order = [o.modelbase_obj.id for o in ListingContent.objects.filter(
             listing=self).order_by("position")]
         li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
         return AttributeWrapper(li, exists=len(li))
+
+    @property
+    def content_queryset(self):
+        return self._get_content_queryset()
+
+    @property
+    def content_queryset_permitted(self):
+        return self._get_content_queryset(manager="permitted")
 
 
 class ListingContent(models.Model):

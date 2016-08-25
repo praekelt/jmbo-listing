@@ -8,7 +8,7 @@ from django.test.client import Client, RequestFactory
 
 from listing.models import Listing
 from listing.listing_styles import LISTING_CLASSES
-from listing.tests.models import TestModel, TestWithTitleModel
+from listing.tests.models import ModelA, ModelB
 
 
 RES_DIR = os.path.join(os.path.dirname(__file__), "res")
@@ -39,28 +39,17 @@ class BaseTestCase(unittest.TestCase):
         cls.editor.save()
         cls.client.login(username="editor", password="password")
 
-        obj = TestModel.objects.create()
-        cls.test_obj = obj
+        obj = ModelA.objects.create(title="ModelA", slug="model-a")
+        cls.model_a = obj
 
-        obj = TestWithTitleModel.objects.create(title="testmodel")
-        cls.test_with_title_obj = obj
+        obj = ModelB.objects.create(title="ModelB", slug="model-b")
+        cls.model_b = obj
 
-    def test_content_type(self):
+    def test_content_types(self):
         listing = Listing.objects.create()
-        listing.content_types = [ContentType.objects.get_for_model(TestModel)]
+        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
         listing.save()
-        from django.db.models import Q
-        from itertools import chain
-        #q = None
-        li = []
-        for ct in ContentType.objects.all():
-            li.append(ct.get_all_objects_for_this_type())
-            #if q is None:
-            #    q = f
-            #else:
-            #    q = q | f
-        aaa = chain(*li)
-        print aaa
-        print "cool"
-        #print listing.queryset
+        qs = listing.queryset
+        self.assertEqual(len(qs), 1)
+        self.failUnless(self.model_a.modelbase_obj in qs)
 
