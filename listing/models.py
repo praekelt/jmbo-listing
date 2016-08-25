@@ -124,10 +124,7 @@ Set to zero to display all items.""",
         return reverse("listing-detail", args=[self.slug])
 
     def _get_queryset(self, manager="objects"):
-        # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
-        # Django 1.7 will remove the need for this slow workaround for the
-        # content field. Due to the workaround we"re not always returning a
-        # real queryset.
+        # Due to the workaround we're not always returning a real queryset.
         content = self._get_content_queryset(manager=manager)
         if content:
             return content
@@ -186,28 +183,9 @@ Set to zero to display all items.""",
                 modelbase_obj=obj, listing=self, position=n
             )
 
-    def _get_pinned_queryset(self, manager="objects"):
-        # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
-        # Django 1.7 will remove the need for this slow workaround. Note we
-        # return an emulated queryset.
-        li = [o for o in getattr(ModelBase, manager).filter(listing_pinned=self)]
-        order = [o.modelbase_obj.id for o in ListingPinned.objects.filter(
-            listing=self).order_by("position")]
-        li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
-        return AttributeWrapper(li, exists=len(li))
-
-    @property
-    def pinned_queryset(self):
-        return self._get_pinned_queryset()
-
-    @property
-    def pinned_queryset_permitted(self):
-        return self._get_pinned_queryset(manager="permitted")
-
     def _get_content_queryset(self, manager="objects"):
-        # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
-        # Django 1.7 will remove the need for this slow workaround. Note we
-        # return an emulated queryset.
+        # I can't find a way to do this in a single query. Note we return an
+        # emulated queryset.
         li = [o for o in getattr(ModelBase, manager).filter(listing_content=self)\
             .exclude(id__in=self.pinned.all())]
         order = [o.modelbase_obj.id for o in ListingContent.objects.filter(
@@ -222,6 +200,23 @@ Set to zero to display all items.""",
     @property
     def content_queryset_permitted(self):
         return self._get_content_queryset(manager="permitted")
+
+    def _get_pinned_queryset(self, manager="objects"):
+        # I can't find a way to do this in a single query. Note we return an
+        # emulated queryset.
+        li = [o for o in getattr(ModelBase, manager).filter(listing_pinned=self)]
+        order = [o.modelbase_obj.id for o in ListingPinned.objects.filter(
+            listing=self).order_by("position")]
+        li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
+        return AttributeWrapper(li, exists=len(li))
+
+    @property
+    def pinned_queryset(self):
+        return self._get_pinned_queryset()
+
+    @property
+    def pinned_queryset_permitted(self):
+        return self._get_pinned_queryset(manager="permitted")
 
 
 class ListingContent(models.Model):
