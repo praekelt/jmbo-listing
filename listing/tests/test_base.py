@@ -7,6 +7,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.test.client import Client, RequestFactory
 
+from category.models import Category, Tag
+
 from listing.models import Listing
 from listing.listing_styles import LISTING_CLASSES
 from listing.tests.models import ModelA, ModelB
@@ -40,18 +42,40 @@ class BaseTestCase(unittest.TestCase):
         cls.editor.save()
         cls.client.login(username="editor", password="password")
 
+        obj = Category.objects.create(title="CatA", slug="cat-a")
+        cls.cat_a = obj
+
+        obj = Category.objects.create(title="CatB", slug="cat-b")
+        cls.cat_b = obj
+
+        obj = Tag.objects.create(title="TagA", slug="tag-a")
+        cls.tag_a = obj
+
+        obj = Tag.objects.create(title="TagB", slug="tag-b")
+        cls.tag_b = obj
+
         obj = ModelA.objects.create(title="ModelA", slug="model-a")
+        obj.categories = [cls.cat_a]
+        obj.tags = [cls.tag_a]
+        obj.save()
         cls.model_a = obj
 
         obj = ModelB.objects.create(title="ModelB", slug="model-b")
+        obj.categories = [cls.cat_b]
+        obj.tags = [cls.tag_b]
+        obj.save()
         cls.model_b = obj
 
         obj = ModelA.objects.create(title="ModelA Published", slug="model-a-p")
+        obj.categories = [cls.cat_a]
+        obj.tags = [cls.tag_a]
         obj.sites = Site.objects.all()
         obj.publish()
         cls.model_a_published = obj
 
         obj = ModelB.objects.create(title="ModelB Published", slug="model-b-p")
+        obj.categories = [cls.cat_b]
+        obj.tags = [cls.tag_b]
         obj.sites = Site.objects.all()
         obj.publish()
         cls.model_b_published = obj
@@ -115,5 +139,35 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(len(qs), 1)
         self.failIf(self.model_a.modelbase_obj in qs)
 
+    def test_categories(self):
+        listing = Listing.objects.create()
+        listing.categories = [self.cat_a]
+        listing.save()
+        qs = listing.queryset
+        self.assertEqual(len(qs), 2)
+        self.failUnless(self.model_a.modelbase_obj in qs)
 
+    def test_categories_permitted(self):
+        listing = Listing.objects.create()
+        listing.categories = [self.cat_a]
+        listing.save()
+        qs = listing.queryset_permitted
+        self.assertEqual(len(qs), 1)
+        self.failUnless(self.model_a_published.modelbase_obj in qs)
+
+    def test_tags(self):
+        listing = Listing.objects.create()
+        listing.tags = [self.tag_a]
+        listing.save()
+        qs = listing.queryset
+        self.assertEqual(len(qs), 2)
+        self.failUnless(self.model_a.modelbase_obj in qs)
+
+    def test_tags_permitted(self):
+        listing = Listing.objects.create()
+        listing.tags = [self.tag_a]
+        listing.save()
+        qs = listing.queryset_permitted
+        self.assertEqual(len(qs), 1)
+        self.failUnless(self.model_a_published.modelbase_obj in qs)
 
