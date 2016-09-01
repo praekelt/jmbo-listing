@@ -5,7 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 from jmbo.models import ModelBase
 
-from listing.listing_styles import LISTING_CLASSES
+from listing.styles import LISTING_CLASSES
 from listing.managers import PermittedManager
 
 

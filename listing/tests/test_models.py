@@ -5,12 +5,13 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.test import TestCase
 from django.test.client import Client, RequestFactory
 
 from category.models import Category, Tag
 
 from listing.models import Listing
-from listing.listing_styles import LISTING_CLASSES
+from listing.styles import LISTING_CLASSES
 from listing.tests.models import ModelA, ModelB
 
 
@@ -25,10 +26,10 @@ def set_image(obj):
     )
 
 
-class BaseTestCase(unittest.TestCase):
+class ModelsTestCase(TestCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpTestData(cls):
         cls.client = Client()
 
         # Editor
