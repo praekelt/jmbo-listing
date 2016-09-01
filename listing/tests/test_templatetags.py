@@ -1,5 +1,4 @@
 import os
-import unittest
 
 from django import template
 from django.contrib.auth import get_user_model
@@ -30,6 +29,10 @@ class TemplateTagsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
+        cls.request = RequestFactory()
+        cls.request.method = "GET"
+        cls.request._path = "/"
+        cls.request.get_full_path = lambda: cls.request._path
 
         # Editor
         cls.editor = get_user_model().objects.create(
@@ -51,13 +54,28 @@ class TemplateTagsTestCase(TestCase):
         obj.publish()
         cls.model_a_published = obj
 
-    def test_listing_vertical(self):
-        listing = Listing.objects.create(slug="listing-vertical", style="Vertical")
+    def common(self, style, category=False):
+        l = style.lower()
+        listing = Listing.objects.create(slug="listing-%s" % l, style=style)
         listing.content_types = [ContentType.objects.get_for_model(ModelA)]
         listing.save()
-        #import pdb;pdb.set_trace()
-        t = template.Template("""{% load listing_tags %}
-        {% listing 'listing-vertical' %}
-        """)
-        result = t.render(template.RequestContext({}))
-        print result
+        t = template.Template("{% load listing_tags %}{% listing 'listing-"
+            + l
+            + "' %}"
+        )
+        result = t.render(template.Context({"request": self.request}))
+        self.failUnless("ModelA Published" in result)
+        if category:
+            self.failUnless("CatA" in result)
+
+    def test_listing_vertical(self):
+        self.common("Vertical", category=True)
+
+    def test_listing_vertical_thumbnail(self):
+        self.common("VerticalThumbnail", category=True)
+
+    def test_listing_horizontal(self):
+        self.common("Horizontal")
+
+    def test_listing_promo(self):
+        self.common("Promo")

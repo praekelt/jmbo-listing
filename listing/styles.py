@@ -28,12 +28,10 @@ class AbstractBaseStyle(object):
         context["items_per_page"] = self.listing.items_per_page
         context["identifier"] = getattr(self.listing, "id", None) \
             or getattr(self.listing, "identifier", "")
-
         return context
 
     def render(self, context, as_tile=False):
         context.push()
-        import pdb;pdb.set_trace()
         result = render_to_string(self.template_name, self.get_context_data(context, as_tile=as_tile))
         context.pop()
         return result
