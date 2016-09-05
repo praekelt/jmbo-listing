@@ -54,14 +54,12 @@ class Listing(models.Model):
         ContentType,
         help_text="Content types to display, eg. post or gallery.",
         blank=True,
-        null=True,
     )
     content = models.ManyToManyField(
         "jmbo.ModelBase",
         help_text="""Individual items to display. Setting this will ignore \
 any setting for <i>Content Type</i>, <i>Categories</i> and <i>Tags</i>.""",
         blank=True,
-        null=True,
         related_name="listing_content",
         through="ListingContent",
     )
@@ -69,14 +67,12 @@ any setting for <i>Content Type</i>, <i>Categories</i> and <i>Tags</i>.""",
         "category.Category",
         help_text="Categories for which to collect items.",
         blank=True,
-        null=True,
         related_name="listing_categories"
     )
     tags = models.ManyToManyField(
         "category.Tag",
         help_text="Tags for which to collect items.",
         blank=True,
-        null=True,
         related_name="listing_tags"
     )
     pinned = models.ManyToManyField(
@@ -84,7 +80,6 @@ any setting for <i>Content Type</i>, <i>Categories</i> and <i>Tags</i>.""",
         help_text="""Individual items to pin to the top of the listing. These
 items are visible across all pages when navigating the listing.""",
         blank=True,
-        null=True,
         related_name="listing_pinned",
         through="ListingPinned",
     )
@@ -104,7 +99,6 @@ Set to zero to display all items.""",
     sites = models.ManyToManyField(
         "sites.Site",
         blank=True,
-        null=True,
         help_text="Sites that this listing will appear on.",
     )
 

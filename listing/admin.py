@@ -17,6 +17,7 @@ from listing.styles import LISTING_CLASSES, LISTING_MAP
 
 
 class ListingAdminForm(forms.ModelForm):
+
     # Content and pinned fields use "through" and require manual handling
     content_helper = forms.models.ModelMultipleChoiceField(
         label=_("Content"),
@@ -42,7 +43,8 @@ items are visible across all pages when navigating the listing."),
             "sites",
         )
         widgets = {
-            "sites": SitesGroupsWidget,
+            # todo: SitesGroupsWidget cause an i18n error at the moment
+            #"sites": SitesGroupsWidget,
             "style": RadioImageSelect(
                 choices=(("x","x"),("y","y")),
                 attrs={"image_attrs": {"style": "max-width: 128px;"}}
@@ -74,7 +76,6 @@ items are visible across all pages when navigating the listing."),
         self.fields["content_types"]._set_queryset(ContentType.objects.filter(id__in=ids).order_by("model"))
 
         # Style
-        choices = LISTING_CLASSES
         self.fields["style"].widget.choices = [
             (kls.__name__, kls.__name__, getattr(kls, "image_path", None)) \
             for kls in LISTING_CLASSES
