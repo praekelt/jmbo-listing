@@ -13,7 +13,6 @@ def join_titles(value, delimiter=", "):
     return delimiter.join([v.title for v in value])
 
 
-
 @register.tag
 def listing(parser, token):
     tokens = token.split_contents()

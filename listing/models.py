@@ -1,5 +1,7 @@
 from django.db import models, connection
 from django.db.models import Q
+from django.dispatch import receiver
+from django.db.models.signals import m2m_changed
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
@@ -227,3 +229,17 @@ class ListingPinned(models.Model):
     modelbase_obj = models.ForeignKey('jmbo.ModelBase')
     listing = models.ForeignKey(Listing, related_name="pinned_link_to_listing")
     position = models.PositiveIntegerField(default=0)
+
+
+@receiver(m2m_changed)
+def check_slug(sender, **kwargs):
+    """Slug must be unique per site"""
+    instance = kwargs["instance"]
+    if (kwargs["action"] == "post_add") \
+        and sender.__name__.endswith("_sites") \
+        and isinstance(instance, (Listing,)):
+        for site in instance.sites.all():
+            q = instance.__class__.objects.filter(slug=instance.slug, sites=site).exclude(id=instance.id)
+            if q.exists():
+                raise RuntimeError("The slug %s is already in use for site %s by %s" % (instance.slug, site.domain, q[0].title))
+
