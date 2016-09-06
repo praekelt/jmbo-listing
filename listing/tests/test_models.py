@@ -191,3 +191,11 @@ class ModelsTestCase(TestCase):
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
 
+    def test_slug_uniqueness(self):
+        sites = Site.objects.all()
+        listing = Listing.objects.create(title="tsu", slug="tsu")
+        listing.sites = [sites[0]]
+        listing.save()
+        listing = Listing.objects.create(title="tsu", slug="tsu")
+        with self.assertRaises(RuntimeError):
+            listing.sites = [sites[0]]
