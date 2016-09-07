@@ -121,16 +121,30 @@ class APITestCase(TestCase):
         self.failUnless(self.model_b.modelbase_obj in listing.queryset)
         self.failIf(self.model_a.modelbase_obj in listing.queryset)
 
-    def test_listing_queryset(self):
+    def test_listing_content(self):
         response = self.client.get(
             "/api/v1/listing-listing/%s/" % self.listing.pk
         )
         as_json = json.loads(response.content)
         self.failUnless(
             "http://testserver/api/v1/jmbo-modelbase/%s/" % \
-                self.model_a.id in as_json["content"]
+                self.model_a.pk in as_json["content"]
         )
         self.failUnless(
             "http://testserver/api/v1/jmbo-modelbase/%s/" % \
-                self.model_a_published.id in as_json["content"]
+                self.model_a_published.pk in as_json["content"]
+        )
+
+    def test_listing_queryset_objects(self):
+        response = self.client.get(
+            "/api/v1/listing-listing/%s/queryset_objects/" % self.listing.pk
+        )
+        as_json = json.loads(response.content)
+        self.failUnless(
+            "http://testserver/api/v1/jmbo-modelbase/%s/" % \
+                self.model_a.pk in as_json
+        )
+        self.failUnless(
+            "http://testserver/api/v1/jmbo-modelbase/%s/" % \
+                self.model_a_published.pk in as_json
         )

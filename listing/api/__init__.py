@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework.reverse import reverse
+from rest_framework.response import Response
+from rest_framework.decorators import detail_route
 import rest_framework_extras
 
 from listing.models import Listing, ListingContent, ListingPinned
@@ -63,6 +65,25 @@ class ListingObjectsViewSet(viewsets.ModelViewSet):
             return ListingCreateUpdateSerializer
         else:
             return ListingSerializer
+
+    # Deviate from naming convention because queryset is already taken
+    @detail_route(methods=["get"])
+    def queryset_objects(self, request, pk, **kwargs):
+        li = []
+        for obj in self.get_object().queryset:
+            # todo :fix this reverse
+            url = "%s%s/" % (reverse("modelbase-list", request=self.request), obj.pk)
+            li.append(url)
+        return Response(li)
+
+    @detail_route(methods=["get"])
+    def queryset_permitted(self, request, pk, **kwargs):
+        li = []
+        for obj in self.get_object().queryset_permitted:
+            # todo :fix this reverse
+            url = "%s%s/" % (reverse("modelbase-list", request=self.request), obj.pk)
+            li.append(url)
+        return Response(li)
 
 
 class ListingPermittedViewSet(ListingObjectsViewSet):
