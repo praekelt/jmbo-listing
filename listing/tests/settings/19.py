@@ -93,5 +93,6 @@ DEBUG = True
 ULTRACACHE = {"invalidate": False}
 
 REST_FRAMEWORK = {
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning"
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json"
 }

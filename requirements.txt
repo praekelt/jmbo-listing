@@ -3,6 +3,7 @@
 -e git+https://github.com/praekelt/django-likes.git@develop#egg=django-likes
 -e git+https://github.com/praekelt/djangorestframework-extras.git@develop#egg=djangorestframework-extras
 -e git+https://github.com/praekelt/jmbo.git@feature/django-1.9#egg=jmbo
+-e git+https://github.com/praekelt/jmbo-post.git@feature/django-1.9#egg=jmbo-post
 
 Django==1.9.6
 django-category==1.9
@@ -14,7 +15,7 @@ django-pagination-fork==1.0.17
 django-photologue==3.5.1
 django-preferences==0.0.2
 #django-secretballot==0.5.0
-django-sites-groups==1.9.1
+django-sites-groups==1.9.2
 django-sortedm2m==1.2.2
 django-ultracache==1.9.1
 ExifRead==2.1.2

@@ -15,7 +15,6 @@ from listing.widgets import RadioImageSelect
 from listing.styles import LISTING_CLASSES, LISTING_MAP
 
 
-
 class ListingAdminForm(forms.ModelForm):
 
     # Content and pinned fields use "through" and require manual handling
@@ -43,8 +42,7 @@ items are visible across all pages when navigating the listing."),
             "sites",
         )
         widgets = {
-            # todo: SitesGroupsWidget cause an i18n error at the moment
-            #"sites": SitesGroupsWidget,
+            "sites": SitesGroupsWidget,
             "style": RadioImageSelect(
                 choices=(("x","x"),("y","y")),
                 attrs={"image_attrs": {"style": "max-width: 128px;"}}

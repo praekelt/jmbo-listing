@@ -1,7 +1,8 @@
 from django.db import models, connection
 from django.db.models import Q
-from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
+from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
@@ -117,7 +118,9 @@ Set to zero to display all items.""",
             return self.title
 
     def get_absolute_url(self):
-        return reverse("listing-detail", args=[self.slug])
+        #return reverse("listing-detail", args=[self.slug])
+        # todo: fix
+        return ""
 
     def _get_queryset(self, manager="objects"):
         # Due to the workaround we're not always returning a real queryset.
