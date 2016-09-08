@@ -24,14 +24,26 @@ class ListingCreateUpdateContentSerializer(
         fields = ("modelbase_obj", "position")
 
 
+class ListingCreateUpdatePinnedSerializer(
+    serializers.HyperlinkedModelSerializer
+):
+    """The many-to-many with a through requires this serializer"""
+
+    class Meta:
+        model = ListingPinned
+        fields = ("modelbase_obj", "position")
+
+
 class ListingCreateUpdateSerializer(serializers.HyperlinkedModelSerializer):
-    content = ListingCreateUpdateContentSerializer(many=True)
+    content = ListingCreateUpdateContentSerializer(many=True, required=False)
+    pinned = ListingCreateUpdatePinnedSerializer(many=True, required=False)
 
     class Meta:
         model = Listing
 
     def create(self, validated_data):
         content = validated_data.pop("content", [])
+        pinned = validated_data.pop("pinned", [])
         listing = super(ListingCreateUpdateSerializer, self).create(
             validated_data
         )
@@ -40,10 +52,15 @@ class ListingCreateUpdateSerializer(serializers.HyperlinkedModelSerializer):
             di["listing"] = listing
             ListingContent.objects.create(**di)
 
+        for di in pinned:
+            di["listing"] = listing
+            ListingPinned.objects.create(**di)
+
         return listing
 
     def update(self, instance, validated_data):
         content = validated_data.pop("content", [])
+        pinned = validated_data.pop("pinned", [])
         listing = super(ListingCreateUpdateSerializer, self).update(
             instance, validated_data
         )
@@ -52,6 +69,11 @@ class ListingCreateUpdateSerializer(serializers.HyperlinkedModelSerializer):
         for di in content:
             di["listing"] = listing
             ListingContent.objects.create(**di)
+
+        ListingPinned.objects.filter(listing=listing).delete()
+        for di in pinned:
+            di["listing"] = listing
+            ListingPinned.objects.create(**di)
 
         return listing
 
@@ -98,22 +120,3 @@ def register(router):
             ("listing-listing", ListingObjectsViewSet)
         )
     )
-
-
-'''
-class PropertiesMixin(Serializer):
-    content = ReadOnlyField()
-    content_pages = ReadOnlyField()
-
-    class Meta:
-        fields = ("content", "content_pages")
-
-
-class PostSerializer(
-    PropertiesMixin, jmbo_api.ModelBaseSerializer
-    ):
-
-    class Meta(jmbo_api.ModelBaseSerializer.Meta):
-        model = Post
-'''
-
