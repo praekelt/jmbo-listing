@@ -4,8 +4,8 @@ from setuptools import setup, find_packages
 setup(
     name="jmbo-listing",
     version="0.1",
-    description="A listing is essentially a stored search that can be rendered in a certain style.",
-    #long_description = open("README.rst", "r").read() + open("AUTHORS.rst", "r").read() + open("CHANGELOG.rst", "r").read(),
+    description="A listing is a stored search that can be rendered in a certain style.",
+    long_description = open("README.rst", "r").read() + open("AUTHORS.rst", "r").read() + open("CHANGELOG.rst", "r").read(),
     author="Praekelt Consulting",
     author_email="dev@praekelt.com",
     license="BSD",
