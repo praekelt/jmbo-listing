@@ -19,6 +19,5 @@ listing_api.register(router)
 urlpatterns = [
     url(r"^admin/", include(admin.site.urls)),
     url(r"^api/(?P<version>(v1))/", include(router.urls)),
-    url(r"^jmbo/", include("jmbo.urls")),
-    #url(r"^post/", include("post.urls")),
+    url(r"^jmbo/", include("jmbo.urls", namespace="jmbo")),
 ]
