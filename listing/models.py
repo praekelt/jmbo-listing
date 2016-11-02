@@ -146,11 +146,11 @@ Set to zero to display all items.""",
         # todo: use manager below
         q = q.exclude(id__in=self.pinned.all())
 
-        # Ensure there are no duplicates. Oracle bugs require special handling
-        # around distinct which incur a performance penalty when fetching
-        # attributes. Avoid the penalty for other databases by doing database
-        # detection.
-        if "oracle" in connection.vendor.lower():
+        # Ensure there are no duplicates. Oracle bugs and SQLite definciencies
+        # require special handling around distinct which incur a performance
+        # penalty when fetching attributes. Avoid the penalty for other
+        # databases by doing database detection.
+        if connection.vendor.lower() in ("oracle", "sqlite"):
             q = q.only("id").distinct()
         else:
             q = q.distinct("publish_on", "created", "id").order_by(
