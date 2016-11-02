@@ -4,7 +4,7 @@ from listing.models import Listing
 
 
 class ListingDetail(DetailView):
-    model = Listing.
+    model = Listing
     template_name = "listing/listing_detail.html"
 
     def get_queryset(self):
