@@ -191,6 +191,13 @@ class ModelsTestCase(TestCase):
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
 
+    def test_iter(self):
+        listing = Listing.objects.create()
+        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
+        listing.save()
+        self.assertEqual(len(listing), 1)
+        self.failUnless(self.model_a_published.modelbase_obj in listing)
+
     def test_slug_uniqueness(self):
         sites = Site.objects.all()
         listing = Listing.objects.create(title="tsu", slug="tsu")

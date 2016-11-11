@@ -217,6 +217,14 @@ Set to zero to display all items.""",
     def pinned_queryset_permitted(self):
         return self._get_pinned_queryset(manager="permitted")
 
+    def __iter__(self):
+        for obj in self.queryset_permitted:
+            yield obj
+
+    def __len__(self):
+        # We can't use count because it's not a real queryset
+        return len(self.queryset_permitted)
+
 
 class ListingContent(models.Model):
     """Through model to facilitate ordering"""
