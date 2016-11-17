@@ -53,8 +53,8 @@ class ListingNode(template.Node):
                 """Helper class emulating Listing API so AbstractBaseStyle
                 works. Essentially a record class."""
 
-                def __init__(self, queryset, **kwargs):
-                    self.queryset = lambda x: queryset
+                def __init__(self, queryset_permitted, **kwargs):
+                    self.queryset_permitted = queryset_permitted
                     self.items_per_page = 0
                     for k, v in kwargs.items():
                         setattr(self, k, v)
