@@ -1,10 +1,10 @@
-{% load ultracache_tags listing_tags i18n %}
+{% load ultracache_tags listing_tags i18n jmbo_inclusion_tags %}
 
 {% ultracache 3600 'modelbase-listing-item-thumbnail-pinned-inclusion' object.id object.modified %}
     {% if object.image %}
         <div class="image">
             <a href="{{ object.get_absolute_url_categorized }}" title="{{ object.title|escape }}">
-                <img src="{{ object.get_modelbase_list_item_thumbnail_pinned_url }}" alt="{{ object.title }}" />
+                <img src="{% image_url object "listing_item_thumbnail_pinned" %}" alt="{{ object.title }}" />
             </a>
         </div>
     {% endif %}

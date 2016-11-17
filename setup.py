@@ -10,10 +10,13 @@ setup(
     author_email="dev@praekelt.com",
     license="BSD",
     url="https://github.com/praekelt/jmbo-listing",
-    packages = find_packages(),
-    install_requires = [
+    packages=find_packages(),
+    install_requires=[
         # Redundant. Pip handles this now.
         "jmbo"
+    ],
+    tests_require=[
+        "tox"
     ],
     include_package_data=True,
     classifiers=[

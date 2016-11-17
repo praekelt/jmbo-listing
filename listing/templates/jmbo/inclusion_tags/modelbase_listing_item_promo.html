@@ -1,5 +1,5 @@
-{% load ultracache_tags listing_tags %}
+{% load ultracache_tags listing_tags jmbo_inclusion_tags %}
 
 {% ultracache 3600 'modelbase-listing-item-promo-inclusion' object.id object.modified %}
-    <a href="{{ object.get_absolute_url_categorized }}" title="{{ object.title|escape }}"><img src="{{ object.get_modelbase_list_item_promo_url }}" alt="{{ object.title }}" alt="{{ object.title }}" /></a>
+    <a href="{{ object.get_absolute_url_categorized }}" title="{{ object.title|escape }}"><img src="{% image_url object "listing_item_promo" %}" alt="{{ object.title }}" /></a>
 {% endultracache %}

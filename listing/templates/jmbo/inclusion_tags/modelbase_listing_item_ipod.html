@@ -1,4 +1,4 @@
-{% load ultracache_tags listing_tags %}
+{% load ultracache_tags listing_tags jmbo_inclusion_tags %}
 
 {% comment %}
 Layout similar to a classic iPod.
@@ -8,7 +8,7 @@ Layout similar to a classic iPod.
     {% if object.image %}
         <div class="image">
             <a href="{{ object.get_absolute_url_categorized }}" title="{{ object.title|escape }}">
-                <img src="{{ object.get_modelbase_list_item_ipod_url }}" alt="{{ object.title }}" />
+                <img src="{% image_url object "listing_item_ipod" %}" alt="{{ object.title }}" />
             </a>
         </div>
     {% endif %}
