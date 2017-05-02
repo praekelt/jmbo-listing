@@ -43,8 +43,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'jmbo-foundry'
-copyright = u'2015, Praekelt'
+project = u'jmbo-listing'
+copyright = u'2016, Praekelt'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -196,7 +196,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'jmbo.tex', u'Jmbo Foundry Documentation',
+  ('index', 'jmbo.tex', u'Jmbo Listing Documentation',
    u'Praekelt', 'manual'),
 ]
 
@@ -226,7 +226,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'jmbo', u'Jmbo Foundry Documentation',
+    ('index', 'jmbo', u'Jmbo Listing Documentation',
      [u'Praekelt'], 1)
 ]
 
@@ -240,7 +240,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'jmbo', u'Jmbo Foundry Documentation',
+  ('index', 'jmbo', u'Jmbo Listing Documentation',
    u'Praekelt', 'jmbo-fouundry', 'One line description of project.',
    'Miscellaneous'),
 ]
