@@ -24,6 +24,7 @@ INSTALLED_APPS = (
     "photologue",
     "category",
     "django_comments",
+    "layers",
     "likes",
     "pagination",
     "preferences",
