@@ -1,8 +1,14 @@
-from django.db import models
+from django.db import models, connection
+from django.db.models import Q
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
+from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
-from listing.listing_styles import LISTING_CLASSES
+from jmbo.models import ModelBase
+
+from listing.styles import LISTING_CLASSES
 from listing.managers import PermittedManager
 
 
@@ -51,14 +57,12 @@ class Listing(models.Model):
         ContentType,
         help_text="Content types to display, eg. post or gallery.",
         blank=True,
-        null=True,
     )
     content = models.ManyToManyField(
         "jmbo.ModelBase",
         help_text="""Individual items to display. Setting this will ignore \
 any setting for <i>Content Type</i>, <i>Categories</i> and <i>Tags</i>.""",
         blank=True,
-        null=True,
         related_name="listing_content",
         through="ListingContent",
     )
@@ -66,14 +70,12 @@ any setting for <i>Content Type</i>, <i>Categories</i> and <i>Tags</i>.""",
         "category.Category",
         help_text="Categories for which to collect items.",
         blank=True,
-        null=True,
         related_name="listing_categories"
     )
     tags = models.ManyToManyField(
         "category.Tag",
         help_text="Tags for which to collect items.",
         blank=True,
-        null=True,
         related_name="listing_tags"
     )
     pinned = models.ManyToManyField(
@@ -81,7 +83,6 @@ any setting for <i>Content Type</i>, <i>Categories</i> and <i>Tags</i>.""",
         help_text="""Individual items to pin to the top of the listing. These
 items are visible across all pages when navigating the listing.""",
         blank=True,
-        null=True,
         related_name="listing_pinned",
         through="ListingPinned",
     )
@@ -101,7 +102,6 @@ Set to zero to display all items.""",
     sites = models.ManyToManyField(
         "sites.Site",
         blank=True,
-        null=True,
         help_text="Sites that this listing will appear on.",
     )
 
@@ -118,22 +118,20 @@ Set to zero to display all items.""",
             return self.title
 
     def get_absolute_url(self):
-        return reverse("listing-detail", args=[self.slug])
+        #return reverse("listing-detail", args=[self.slug])
+        # todo: fix
+        return ""
 
-    @property
-    def queryset(self):
-        # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
-        # Django 1.7 will remove the need for this slow workaround for the
-        # content field. Due to the workaround we"re not always returning a
-        # real queryset.
-        content = self.content_queryset
+    def _get_queryset(self, manager="objects"):
+        # Due to the workaround we're not always returning a real queryset.
+        content = self._get_content_queryset(manager=manager)
         if content:
             return content
 
-        q = ModelBase.permitted.all()
+        q = getattr(ModelBase, manager).all()
         one_match = False
-        if self.content_type.exists():
-            q = q.filter(content_type__in=self.content_type.all())
+        if self.content_types.exists():
+            q = q.filter(content_type__in=self.content_types.all())
             one_match = True
         if self.categories.exists():
             q1 = Q(primary_category__in=self.categories.all())
@@ -145,13 +143,14 @@ Set to zero to display all items.""",
             one_match = True
         if not one_match:
             q = ModelBase.objects.none()
+        # todo: use manager below
         q = q.exclude(id__in=self.pinned.all())
 
-        # Ensure there are no duplicates. Oracle bugs require special handling
-        # around distinct which incur a performance penalty when fetching
-        # attributes. Avoid the penalty for other databases by doing database
-        # detection.
-        if "oracle" in connection.vendor.lower():
+        # Ensure there are no duplicates. Oracle bugs and SQLite definciencies
+        # require special handling around distinct which incur a performance
+        # penalty when fetching attributes. Avoid the penalty for other
+        # databases by doing database detection.
+        if connection.vendor.lower() in ("oracle", "sqlite"):
             q = q.only("id").distinct()
         else:
             q = q.distinct("publish_on", "created", "id").order_by(
@@ -162,6 +161,14 @@ Set to zero to display all items.""",
             q = q[:self.count]
 
         return q
+
+    @property
+    def queryset(self):
+        return self._get_queryset()
+
+    @property
+    def queryset_permitted(self):
+        return self._get_queryset(manager="permitted")
 
     def set_pinned(self, iterable):
         for n, obj in enumerate(iterable):
@@ -175,28 +182,48 @@ Set to zero to display all items.""",
                 modelbase_obj=obj, listing=self, position=n
             )
 
-    @property
-    def pinned_queryset(self):
-        # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
-        # Django 1.7 will remove the need for this slow workaround. Note we
-        # return an emulated queryset.
-        li = [o for o in ModelBase.permitted.filter(listing_pinned=self)]
-        order = [o.modelbase_obj.id for o in ListingPinned.objects.filter(
+    def _get_content_queryset(self, manager="objects"):
+        # I can't find a way to do this in a single query. Note we return an
+        # emulated queryset.
+        li = [o for o in getattr(ModelBase, manager).filter(listing_content=self)\
+            .exclude(id__in=self.pinned.all())]
+        order = [o.modelbase_obj.id for o in ListingContent.objects.filter(
             listing=self).order_by("position")]
         li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
         return AttributeWrapper(li, exists=len(li))
 
     @property
     def content_queryset(self):
-        # See https://docs.djangoproject.com/en/1.8/topics/db/queries/#using-a-custom-reverse-manager.
-        # Django 1.7 will remove the need for this slow workaround. Note we
-        # return an emulated queryset.
-        li = [o for o in ModelBase.permitted.filter(listing_content=self)\
-            .exclude(id__in=self.pinned.all())]
-        order = [o.modelbase_obj.id for o in ListingContent.objects.filter(
+        return self._get_content_queryset()
+
+    @property
+    def content_queryset_permitted(self):
+        return self._get_content_queryset(manager="permitted")
+
+    def _get_pinned_queryset(self, manager="objects"):
+        # I can't find a way to do this in a single query. Note we return an
+        # emulated queryset.
+        li = [o for o in getattr(ModelBase, manager).filter(listing_pinned=self)]
+        order = [o.modelbase_obj.id for o in ListingPinned.objects.filter(
             listing=self).order_by("position")]
         li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
         return AttributeWrapper(li, exists=len(li))
+
+    @property
+    def pinned_queryset(self):
+        return self._get_pinned_queryset()
+
+    @property
+    def pinned_queryset_permitted(self):
+        return self._get_pinned_queryset(manager="permitted")
+
+    def __iter__(self):
+        for obj in self.queryset_permitted:
+            yield obj
+
+    def __len__(self):
+        # We can't use count because it's not a real queryset
+        return len(self.queryset_permitted)
 
 
 class ListingContent(models.Model):
@@ -213,3 +240,17 @@ class ListingPinned(models.Model):
     modelbase_obj = models.ForeignKey('jmbo.ModelBase')
     listing = models.ForeignKey(Listing, related_name="pinned_link_to_listing")
     position = models.PositiveIntegerField(default=0)
+
+
+@receiver(m2m_changed)
+def check_slug(sender, **kwargs):
+    """Slug must be unique per site"""
+    instance = kwargs["instance"]
+    if (kwargs["action"] == "post_add") \
+        and sender.__name__.endswith("_sites") \
+        and isinstance(instance, (Listing,)):
+        for site in instance.sites.all():
+            q = instance.__class__.objects.filter(slug=instance.slug, sites=site).exclude(id=instance.id)
+            if q.exists():
+                raise RuntimeError("The slug %s is already in use for site %s by %s" % (instance.slug, site.domain, q[0].title))
+

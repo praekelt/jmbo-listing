@@ -1,0 +1,82 @@
+[
+    {
+        "pk": null,
+        "model": "photologue.photosize",
+        "fields": {
+            "name": "jmbo_modelbase_listing_item_thumbnail",
+            "watermark": null,
+            "increment_count": false,
+            "effect": null,
+            "crop": true,
+            "height": 64,
+            "width": 64,
+            "upscale": false,
+            "pre_cache": false,
+            "quality": 90
+        }
+    },
+    {
+        "pk": null,
+        "model": "photologue.photosize",
+        "fields": {
+            "name": "jmbo_modelbase_listing_item_thumbnail_pinned",
+            "watermark": null,
+            "increment_count": false,
+            "effect": null,
+            "crop": true,
+            "height": 128,
+            "width": 128,
+            "upscale": false,
+            "pre_cache": false,
+            "quality": 90
+        }
+    },
+    {
+        "pk": null,
+        "model": "photologue.photosize",
+        "fields": {
+            "name": "jmbo_modelbase_listing_item_promo",
+            "watermark": null,
+            "increment_count": false,
+            "effect": null,
+            "crop": true,
+            "height": 337,
+            "width": 600,
+            "upscale": true,
+            "pre_cache": false,
+            "quality": 90
+        }
+    },
+    {
+        "pk": null,
+        "model": "photologue.photosize",
+        "fields": {
+            "name": "jmbo_modelbase_listing_item_ipod",
+            "watermark": null,
+            "increment_count": false,
+            "effect": null,
+            "crop": true,
+            "height": 64,
+            "width": 64,
+            "upscale": false,
+            "pre_cache": false,
+            "quality": 90
+        }
+    },
+    {
+        "pk": null,
+        "model": "photologue.photosize",
+        "fields": {
+            "name": "jmbo_modelbase_listing_item_ipod_pinned",
+            "watermark": null,
+            "increment_count": false,
+            "effect": null,
+            "crop": true,
+            "height": 96,
+            "width": 96,
+            "upscale": false,
+            "pre_cache": false,
+            "quality": 90
+        }
+    }
+]

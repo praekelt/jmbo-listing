@@ -1,4 +1,4 @@
-Django==1.9.6
+Django==1.10.4
 django-category==1.9
 django-contrib-comments==1.7.1
 django-export==1.9
@@ -20,5 +20,5 @@ psycopg2==2.6.1
 pytz==2016.4
 PyYAML==3.11
 requests==2.10.0
-djangorestframework==3.3.2
+djangorestframework==3.6.2
 six==1.9.0

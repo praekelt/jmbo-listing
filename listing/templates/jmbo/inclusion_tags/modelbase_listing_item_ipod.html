@@ -1,0 +1,20 @@
+{% load ultracache_tags listing_tags jmbo_inclusion_tags %}
+
+{% comment %}
+Layout similar to a classic iPod.
+{% endcomment %}
+
+{% ultracache 3600 'modelbase-listing-item-ipod-inclusion' object.id object.modified %}
+    {% if object.image %}
+        <div class="image">
+            <a href="{{ object.get_absolute_url_categorized }}" title="{{ object.title|escape }}">
+                <img src="{% image_url object "listing_item_ipod" %}" alt="{{ object.title }}" />
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="title">
+        {% if object.categories.all.exists %}<span class="category">{{ object.categories.all|join_titles }}:</span>{% endif %}
+        <a href="{{ object.get_absolute_url_categorized }}" title="{{ object.title|escape }}">{{ object.title }}</a>
+    </div>
+{% endultracache %}

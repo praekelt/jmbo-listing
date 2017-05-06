@@ -4,16 +4,18 @@ from setuptools import setup, find_packages
 setup(
     name="jmbo-listing",
     version="0.1",
-    description="A listing is essentially a stored search that can be rendered in a certain style.",
-    #long_description = open("README.rst", "r").read() + open("AUTHORS.rst", "r").read() + open("CHANGELOG.rst", "r").read(),
+    description="A listing is a stored search that can be rendered in a certain style.",
+    long_description = open("README.rst", "r").read() + open("AUTHORS.rst", "r").read() + open("CHANGELOG.rst", "r").read(),
     author="Praekelt Consulting",
     author_email="dev@praekelt.com",
     license="BSD",
     url="https://github.com/praekelt/jmbo-listing",
-    packages = find_packages(),
-    install_requires = [
-        # Redundant. Pip handles this now.
-        "jmbo"
+    packages=find_packages(),
+    install_requires=[
+        "jmbo>=3.0.0"
+    ],
+    tests_require=[
+        "tox"
     ],
     include_package_data=True,
     classifiers=[
