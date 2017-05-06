@@ -12,8 +12,7 @@ setup(
     url="https://github.com/praekelt/jmbo-listing",
     packages=find_packages(),
     install_requires=[
-        # Redundant. Pip handles this now.
-        "jmbo"
+        "jmbo>=3.0.0"
     ],
     tests_require=[
         "tox"
