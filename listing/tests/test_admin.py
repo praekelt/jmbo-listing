@@ -8,7 +8,7 @@ class AdminTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.client = Client()
+        super(AdminTestCase, cls).setUpTestData()
 
         # Editor
         cls.editor = get_user_model().objects.create(
@@ -21,8 +21,13 @@ class AdminTestCase(TestCase):
         cls.editor.save()
 
     def setUp(self):
+        super(AdminTestCase, self).setUp()
         self.client.login(username="editor", password="password")
 
     def test_add(self):
         response = self.client.get("/admin/listing/listing/add/")
         self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            """<img src="/static/admin/listing/images/horizontal.png" style="max-width: 128px;" />"""
+        )

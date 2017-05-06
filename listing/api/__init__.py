@@ -12,6 +12,7 @@ class ListingSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Listing
+        fields = "__all__"
 
 
 class ListingCreateUpdateContentSerializer(
@@ -40,6 +41,7 @@ class ListingCreateUpdateSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Listing
+        fields = "__all__"
 
     def create(self, validated_data):
         content = validated_data.pop("content", [])

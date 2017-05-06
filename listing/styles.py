@@ -32,7 +32,8 @@ class AbstractBaseStyle(object):
 
     def render(self, context, as_tile=False):
         context.push()
-        result = render_to_string(self.template_name, self.get_context_data(context, as_tile=as_tile))
+        new_context = self.get_context_data(context, as_tile=as_tile)
+        result = render_to_string(self.template_name, new_context.flatten())
         context.pop()
         return result
 

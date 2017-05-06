@@ -2,16 +2,16 @@ import inspect
 from importlib import import_module
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 
 from sites_groups.widgets import SitesGroupsWidget
 from jmbo.models import ModelBase
 
 from listing.models import Listing, ListingContent, ListingPinned
-from listing.widgets import RadioImageSelect
 from listing.styles import LISTING_CLASSES, LISTING_MAP
 
 
@@ -43,10 +43,7 @@ items are visible across all pages when navigating the listing."),
         )
         widgets = {
             "sites": SitesGroupsWidget,
-            "style": RadioImageSelect(
-                choices=(("x","x"),("y","y")),
-                attrs={"image_attrs": {"style": "max-width: 128px;"}}
-            ),
+            "style": forms.widgets.RadioSelect
         }
 
     def __init__(self, *args, **kwargs):
@@ -74,10 +71,19 @@ items are visible across all pages when navigating the listing."),
         self.fields["content_types"]._set_queryset(ContentType.objects.filter(id__in=ids).order_by("model"))
 
         # Style
-        self.fields["style"].widget.choices = [
-            (kls.__name__, kls.__name__, getattr(kls, "image_path", None)) \
-            for kls in LISTING_CLASSES
-        ]
+        choices = []
+        for kls in LISTING_CLASSES:
+            image_path = getattr(kls, "image_path", None)
+            image_markup = ""
+            if image_path:
+                image_markup = \
+                    "<img src=\"%s%s\" style=\"max-width: 128px;\" />" \
+                        % (settings.STATIC_URL.rstrip("/"), image_path)
+            choices.append((
+                kls.__name__,
+                mark_safe("%s%s" % (image_markup, kls.__name__))
+            ))
+        self.fields["style"].widget.choices = choices
 
     def clean(self):
         super(ListingAdminForm, self).clean()

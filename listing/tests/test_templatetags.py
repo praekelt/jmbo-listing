@@ -28,6 +28,7 @@ class TemplateTagsTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        super(TemplateTagsTestCase, cls).setUpTestData()
         cls.client = Client()
         cls.request = RequestFactory()
         cls.request.method = "GET"
