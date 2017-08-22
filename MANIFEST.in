@@ -2,6 +2,7 @@ include AUTHORS.rst
 include CHANGELOG.rst
 include LICENSE
 include README.rst
+recursive-include listing/fixtures *
 recursive-include listing/templates *
 recursive-include listing/templatetags *
 recursive-include listing/migrations *
