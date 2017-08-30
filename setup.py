@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="jmbo-listing",
-    version="0.1.1",
+    version="0.1.2",
     description="A listing is a stored search that can be rendered in a certain style.",
     long_description = open("README.rst", "r").read() + open("AUTHORS.rst", "r").read() + open("CHANGELOG.rst", "r").read(),
     author="Praekelt Consulting",

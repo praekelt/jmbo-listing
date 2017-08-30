@@ -92,7 +92,7 @@ class ListingQuerysetNode(template.Node):
         as_var = self.as_var.resolve(context)
         try:
             obj = Listing.permitted.get(slug=slug)
-            context[as_var] = obj.queryset(context["request"])
+            context[as_var] = obj.queryset
         except Listing.DoesNotExist:
             obj = None
             context[as_var] = None
