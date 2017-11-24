@@ -1,6 +1,10 @@
 Changelog
 =========
 
+next
+----
+#. Add missing migrations.
+
 0.1.2
 -----
 #. Update ``get_listing_queryset`` to use ``queryset`` property.
