@@ -1,11 +1,14 @@
 import os
 
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.test import TestCase
 from django.test.client import Client, RequestFactory
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from category.models import Category, Tag
 
@@ -55,43 +58,43 @@ class ModelsTestCase(TestCase):
         cls.tag_b = obj
 
         obj = ModelA.objects.create(title="ModelA", slug="model-a")
-        obj.categories = [cls.cat_a]
-        obj.tags = [cls.tag_a]
         obj.save()
+        obj.categories.set([cls.cat_a])
+        obj.tags.set([cls.tag_a])
         cls.model_a = obj
 
         obj = ModelB.objects.create(title="ModelB", slug="model-b")
-        obj.categories = [cls.cat_b]
-        obj.tags = [cls.tag_b]
         obj.save()
+        obj.categories.set([cls.cat_b])
+        obj.tags.set([cls.tag_b])
         cls.model_b = obj
 
         obj = ModelA.objects.create(title="ModelA Published", slug="model-a-p")
-        obj.categories = [cls.cat_a]
-        obj.tags = [cls.tag_a]
-        obj.sites = Site.objects.all()
         obj.publish()
+        obj.categories.set([cls.cat_a])
+        obj.tags.set([cls.tag_a])
+        obj.sites.set(Site.objects.all())
         cls.model_a_published = obj
 
         obj = ModelB.objects.create(title="ModelB Published", slug="model-b-p")
-        obj.categories = [cls.cat_b]
-        obj.tags = [cls.tag_b]
-        obj.sites = Site.objects.all()
         obj.publish()
+        obj.categories.set([cls.cat_b])
+        obj.tags.set([cls.tag_b])
+        obj.sites.set(Site.objects.all())
         cls.model_b_published = obj
 
     def test_content_types(self):
         listing = Listing.objects.create()
-        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
         listing.save()
+        listing.content_types.set([ContentType.objects.get_for_model(ModelA)])
         qs = listing.queryset
         self.assertEqual(len(qs), 2)
         self.failUnless(self.model_a.modelbase_obj in qs)
 
     def test_content_types_permitted(self):
         listing = Listing.objects.create()
-        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
         listing.save()
+        listing.content_types.set([ContentType.objects.get_for_model(ModelA)])
         qs = listing.queryset_permitted
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
@@ -141,68 +144,68 @@ class ModelsTestCase(TestCase):
 
     def test_categories(self):
         listing = Listing.objects.create()
-        listing.categories = [self.cat_a]
         listing.save()
+        listing.categories.set([self.cat_a])
         qs = listing.queryset
         self.assertEqual(len(qs), 2)
         self.failUnless(self.model_a.modelbase_obj in qs)
 
     def test_categories_permitted(self):
         listing = Listing.objects.create()
-        listing.categories = [self.cat_a]
         listing.save()
+        listing.categories.set([self.cat_a])
         qs = listing.queryset_permitted
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
 
     def test_tags(self):
         listing = Listing.objects.create()
-        listing.tags = [self.tag_a]
         listing.save()
+        listing.tags.set([self.tag_a])
         qs = listing.queryset
         self.assertEqual(len(qs), 2)
         self.failUnless(self.model_a.modelbase_obj in qs)
 
     def test_tags_permitted(self):
         listing = Listing.objects.create()
-        listing.tags = [self.tag_a]
         listing.save()
+        listing.tags.set([self.tag_a])
         qs = listing.queryset_permitted
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
 
     def test_logical_and(self):
         listing = Listing.objects.create()
-        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
-        listing.categories = [self.cat_a]
-        listing.tags = [self.tag_a]
         listing.save()
+        listing.content_types.set([ContentType.objects.get_for_model(ModelA)])
+        listing.tags.set([self.tag_a])
+        listing.categories.set([self.cat_a])
         qs = listing.queryset
         self.assertEqual(len(qs), 2)
         self.failUnless(self.model_a.modelbase_obj in qs)
 
     def test_logical_and_permitted(self):
         listing = Listing.objects.create()
-        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
-        listing.categories = [self.cat_a]
-        listing.tags = [self.tag_a]
         listing.save()
+        listing.content_types.set([ContentType.objects.get_for_model(ModelA)])
+        listing.categories.set([self.cat_a])
+        listing.tags.set([self.tag_a])
         qs = listing.queryset_permitted
         self.assertEqual(len(qs), 1)
         self.failUnless(self.model_a_published.modelbase_obj in qs)
 
     def test_iter(self):
         listing = Listing.objects.create()
-        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
         listing.save()
+        listing.content_types.set([ContentType.objects.get_for_model(ModelA)])
         self.assertEqual(len(listing), 1)
         self.failUnless(self.model_a_published.modelbase_obj in listing)
 
     def test_slug_uniqueness(self):
         sites = Site.objects.all()
         listing = Listing.objects.create(title="tsu", slug="tsu")
-        listing.sites = [sites[0]]
         listing.save()
+        listing.sites.set([sites[0]])
         listing = Listing.objects.create(title="tsu", slug="tsu")
         with self.assertRaises(RuntimeError):
-            listing.sites = [sites[0]]
+            listing.sites.set([sites[0]])

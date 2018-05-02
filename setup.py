@@ -12,7 +12,7 @@ setup(
     url="https://github.com/praekelt/jmbo-listing",
     packages=find_packages(),
     install_requires=[
-        "jmbo>=3.0.0"
+        "jmbo>=3.0.0"   # todo: bump when jmbo has stable Django 2 compatible release
     ],
     tests_require=[
         "tox"

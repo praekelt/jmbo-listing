@@ -2,9 +2,12 @@ from django.db import models, connection
 from django.db.models import Q
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from jmbo.models import ModelBase
 
@@ -28,6 +31,13 @@ class AttributeWrapper:
 
     def __setstate__(self, dict):
         self.__dict__.update(dict)
+
+    def __len__(self):
+        return len(self._obj)
+
+    def __iter__(self):
+        for obj in self._obj:
+            yield obj
 
     @property
     def klass(self):
@@ -189,7 +199,8 @@ Set to zero to display all items.""",
             .exclude(id__in=self.pinned.all())]
         order = [o.modelbase_obj.id for o in ListingContent.objects.filter(
             listing=self).order_by("position")]
-        li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
+        #li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
+        li.sort(key=lambda item: order.index(item.id))
         return AttributeWrapper(li, exists=len(li))
 
     @property
@@ -206,7 +217,8 @@ Set to zero to display all items.""",
         li = [o for o in getattr(ModelBase, manager).filter(listing_pinned=self)]
         order = [o.modelbase_obj.id for o in ListingPinned.objects.filter(
             listing=self).order_by("position")]
-        li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
+        #li.sort(lambda a, b: cmp(order.index(a.id), order.index(b.id)))
+        li.sort(key=lambda item: order.index(item.id))
         return AttributeWrapper(li, exists=len(li))
 
     @property
@@ -229,16 +241,23 @@ Set to zero to display all items.""",
 class ListingContent(models.Model):
     """Through model to facilitate ordering"""
 
-    modelbase_obj = models.ForeignKey('jmbo.ModelBase')
-    listing = models.ForeignKey(Listing, related_name="content_link_to_listing")
+    modelbase_obj = models.ForeignKey(
+        'jmbo.ModelBase', on_delete=models.CASCADE
+    )
+    listing = models.ForeignKey(
+        Listing, related_name="content_link_to_listing",
+        on_delete=models.CASCADE
+    )
     position = models.PositiveIntegerField(default=0)
 
 
 class ListingPinned(models.Model):
     """Through model to facilitate ordering"""
 
-    modelbase_obj = models.ForeignKey('jmbo.ModelBase')
-    listing = models.ForeignKey(Listing, related_name="pinned_link_to_listing")
+    modelbase_obj = models.ForeignKey('jmbo.ModelBase', on_delete=models.CASCADE)
+    listing = models.ForeignKey(
+        Listing, related_name="pinned_link_to_listing", on_delete=models.CASCADE
+    )
     position = models.PositiveIntegerField(default=0)
 
 

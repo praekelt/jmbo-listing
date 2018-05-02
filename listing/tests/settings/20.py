@@ -26,7 +26,7 @@ INSTALLED_APPS = (
     "django_comments",
     "layers",
     "likes",
-    "pagination",
+    "dj_pagination",
     "preferences",
     "rest_framework",
     "rest_framework_extras",
@@ -43,15 +43,14 @@ INSTALLED_APPS = (
 
 ROOT_URLCONF = "listing.tests.urls"
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.SessionAuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "likes.middleware.SecretBallotUserIpUseragentMiddleware",
-    "pagination.middleware.PaginationMiddleware",
+    "dj_pagination.middleware.PaginationMiddleware",
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -73,6 +72,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": TEMPLATE_CONTEXT_PROCESSORS,
+            "debug": True
         },
     },
 ]

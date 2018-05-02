@@ -29,42 +29,26 @@ class TemplateTagsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(TemplateTagsTestCase, cls).setUpTestData()
-        cls.client = Client()
-        cls.request = RequestFactory()
-        cls.request.method = "GET"
-        cls.request._path = "/"
-        cls.request.get_full_path = lambda: cls.request._path
-
-        # Editor
-        cls.editor = get_user_model().objects.create(
-            username="editor",
-            email="editor@test.com",
-            is_superuser=True,
-            is_staff=True
-        )
-        cls.editor.set_password("password")
-        cls.editor.save()
-        cls.client.login(username="editor", password="password")
 
         obj = Category.objects.create(title="CatA", slug="cat-a")
         cls.cat_a = obj
 
         obj = ModelA.objects.create(title="ModelA Published", slug="model-a-p")
-        obj.categories = [cls.cat_a]
-        obj.sites = Site.objects.all()
         obj.publish()
+        obj.categories.set([cls.cat_a])
+        obj.sites.set(Site.objects.all())
         cls.model_a_published = obj
 
     def common(self, style, category=False):
         l = style.lower()
         listing = Listing.objects.create(slug="listing-%s" % l, style=style)
-        listing.content_types = [ContentType.objects.get_for_model(ModelA)]
         listing.save()
+        listing.content_types.set([ContentType.objects.get_for_model(ModelA)])
         t = template.Template("{% load listing_tags %}{% listing 'listing-"
             + l
             + "' %}"
         )
-        result = t.render(template.Context({"request": self.request}))
+        result = t.render(template.Context({"request": RequestFactory().get("/")}))
         self.failUnless("ModelA Published" in result)
         if category:
             self.failUnless("CatA" in result)

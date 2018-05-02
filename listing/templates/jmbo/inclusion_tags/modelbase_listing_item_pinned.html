@@ -1,4 +1,4 @@
-{% load ultracache_tags listing_tags i18n %}
+{% load ultracache_tags listing_tags %}
 
 {% ultracache 3600 'modelbase-listing-item-pinned-inclusion' object.id object.modified %}
     <div class="title">

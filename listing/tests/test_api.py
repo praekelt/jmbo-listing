@@ -42,35 +42,36 @@ class APITestCase(TestCase):
         cls.tag_b = obj
 
         obj = ModelA.objects.create(title="ModelA", slug="model-a")
-        obj.categories = [cls.cat_a]
-        obj.tags = [cls.tag_a]
         obj.save()
+        obj.categories.set([cls.cat_a])
+        obj.tags.set([cls.tag_a])
         cls.model_a = obj
 
         obj = ModelB.objects.create(title="ModelB", slug="model-b")
-        obj.categories = [cls.cat_b]
-        obj.tags = [cls.tag_b]
         obj.save()
+        obj.categories.set([cls.cat_b])
+        obj.tags.set([cls.tag_b])
         cls.model_b = obj
 
         obj = ModelA.objects.create(title="ModelA Published", slug="model-a-p")
-        obj.categories = [cls.cat_a]
-        obj.tags = [cls.tag_a]
-        obj.sites = Site.objects.all()
         obj.publish()
+        obj.sites.set(Site.objects.all())
+        obj.categories.set([cls.cat_a])
+        obj.tags.set([cls.tag_a])
         cls.model_a_published = obj
 
         obj = ModelB.objects.create(title="ModelB Published", slug="model-b-p")
-        obj.categories = [cls.cat_b]
-        obj.tags = [cls.tag_b]
-        obj.sites = Site.objects.all()
         obj.publish()
+        obj.sites.set(Site.objects.all())
+        obj.categories.set([cls.cat_b])
+        obj.tags.set([cls.tag_b])
         cls.model_b_published = obj
 
         cls.listing = Listing.objects.create(title="listing", slug="listing")
         cls.listing.set_content([cls.model_a, cls.model_a_published])
 
     def setUp(self):
+        super(APITestCase, self).setUp()
         self.client.logout()
 
     def login(self):
@@ -96,7 +97,7 @@ class APITestCase(TestCase):
             json.dumps(data),
             content_type="application/json"
         )
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertTrue(Listing.objects.filter(slug="title").exists())
         listing = Listing.objects.get(slug="title")
         self.failUnless(self.model_a.modelbase_obj in listing.queryset)
@@ -116,7 +117,7 @@ class APITestCase(TestCase):
             json.dumps(data),
             content_type="application/json"
         )
-        as_json = json.loads(response.content)
+        as_json = response.json()
         listing = Listing.objects.get(slug="listing")
         self.failUnless(self.model_b.modelbase_obj in listing.queryset)
         self.failIf(self.model_a.modelbase_obj in listing.queryset)
@@ -125,7 +126,7 @@ class APITestCase(TestCase):
         response = self.client.get(
             "/api/v1/listing-listing/%s/" % self.listing.pk
         )
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failUnless(
             "http://testserver/api/v1/jmbo-modelbase/%s/" % \
                 self.model_a.pk in as_json["content"]
@@ -139,7 +140,7 @@ class APITestCase(TestCase):
         response = self.client.get(
             "/api/v1/listing-listing/%s/queryset_objects/" % self.listing.pk
         )
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failUnless(
             "http://testserver/api/v1/jmbo-modelbase/%s/" % \
                 self.model_a.pk in as_json

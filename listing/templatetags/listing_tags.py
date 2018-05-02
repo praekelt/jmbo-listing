@@ -1,3 +1,4 @@
+import sys
 import types
 
 from django import template
@@ -42,7 +43,11 @@ class ListingNode(template.Node):
     def render(self, context, as_tile=False):
         slug_or_queryset = self.slug_or_queryset.resolve(context)
 
-        if isinstance(slug_or_queryset, types.UnicodeType):
+        if sys.version_info[0] < 3:
+            kls = types.UnicodeType
+        else:
+            kls = str
+        if isinstance(slug_or_queryset, kls):
             try:
                 obj = Listing.permitted.get(slug=slug_or_queryset)
             except Listing.DoesNotExist:

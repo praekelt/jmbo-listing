@@ -1,4 +1,4 @@
-{% load ultracache_tags listing_tags i18n jmbo_inclusion_tags %}
+{% load ultracache_tags listing_tags jmbo_inclusion_tags %}
 
 {% ultracache 3600 'modelbase-listing-item-thumbnail-pinned-inclusion' object.id object.modified %}
     {% if object.image %}
